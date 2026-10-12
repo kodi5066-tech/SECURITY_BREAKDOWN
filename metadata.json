@@ -1,0 +1,6 @@
+{
+  "name": "BrandGuard DRP - Android Notification Threat Protection",
+  "description": "Digital Risk Protection system detecting scams, phishing links, fake offers, and impersonation from Android message notifications with real-time warning alerts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
