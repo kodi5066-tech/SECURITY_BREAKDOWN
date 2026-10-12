@@ -65,8 +65,8 @@ export const AndroidSimulator: React.FC<AndroidSimulatorProps> = ({
     const permission = await Notification.requestPermission();
     setBrowserNotificationStatus(permission);
     if (permission === 'granted') {
-      new Notification('BrandGuard DRP Sentinel Active', {
-        body: 'Real-time warning notifications will appear here when threats are detected.',
+      new Notification('BrandGuard demo alerts enabled', {
+        body: 'Browser demo alerts will appear here when simulated threats are detected.',
         icon: 'https://cdn-icons-png.flaticon.com/512/9426/9426997.png',
       });
     }
@@ -112,6 +112,7 @@ export const AndroidSimulator: React.FC<AndroidSimulatorProps> = ({
 
     const event: NotificationEvent = {
       id: 'evt-' + Date.now(),
+      source: 'simulated',
       timestamp: new Date().toISOString(),
       appName: meta.name,
       packageName: pkg,
@@ -161,14 +162,13 @@ export const AndroidSimulator: React.FC<AndroidSimulatorProps> = ({
           </div>
           <div>
             <h3 className="font-semibold text-slate-100 flex items-center gap-2">
-              Android Notification Threat Detection Studio
+              Threat Simulation Studio
               <span className="text-xs font-normal text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                 Interactive Testbed
               </span>
             </h3>
             <p className="text-sm text-slate-400 mt-0.5">
-              Simulate incoming notifications from WhatsApp, Instagram, Telegram, and SMS. See how BrandGuard's
-              on-device Sentinel inspects notification text and fires immediate warning notifications.
+              Test sample messages from WhatsApp, Instagram, Telegram, and SMS. This browser simulation does not read notifications from a real Android device.
             </p>
           </div>
         </div>
@@ -180,12 +180,12 @@ export const AndroidSimulator: React.FC<AndroidSimulatorProps> = ({
               className="flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md shadow-emerald-950"
             >
               <Bell className="w-3.5 h-3.5" />
-              <span>Enable Real Browser Warnings</span>
+              <span>Enable Browser Demo Alerts</span>
             </button>
           ) : (
             <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-3 py-2 rounded-lg">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Real Notifications Active</span>
+              <span>Browser Alerts Enabled</span>
             </div>
           )}
 
@@ -332,7 +332,7 @@ export const AndroidSimulator: React.FC<AndroidSimulatorProps> = ({
 
             <div className="flex items-center justify-between pt-2">
               <span className="text-xs text-slate-500">
-                Processes on-device using regex & heuristic engine
+                Analyzed in this browser demo
               </span>
               <button
                 disabled={isProcessing || !customMessage.trim()}
@@ -351,10 +351,10 @@ export const AndroidSimulator: React.FC<AndroidSimulatorProps> = ({
           
           <div className="text-center mb-3">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Live Android 15 Device Shade
+              Android-style Preview (Simulation)
             </span>
             <p className="text-[11px] text-slate-500">
-              Visualizes real-time notification interception & immediate warning
+              Preview only · no Android device is connected
             </p>
           </div>
 
@@ -383,7 +383,7 @@ export const AndroidSimulator: React.FC<AndroidSimulatorProps> = ({
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 text-emerald-400 font-semibold text-[10px]">
                     <Shield className="w-3 h-3" />
-                    <span>BrandGuard Sentinel Active</span>
+                    <span>Demo Preview</span>
                   </div>
                 </div>
                 <span>Silent</span>
@@ -392,7 +392,7 @@ export const AndroidSimulator: React.FC<AndroidSimulatorProps> = ({
               {/* Notification Shade Content */}
               <div className="p-3 space-y-3 flex-1 overflow-y-auto">
                 
-                {/* Active Intercepted Notification Shade */}
+                {/* Simulated notification preview */}
                 {currentIncomingNotice ? (
                   <div className="space-y-2.5 animate-in fade-in slide-in-from-top-3 duration-200">
                     
@@ -420,7 +420,7 @@ export const AndroidSimulator: React.FC<AndroidSimulatorProps> = ({
                       </p>
 
                       <div className="text-[10px] text-slate-500 pt-1 flex items-center justify-between border-t border-slate-700/50">
-                        <span>Intercepted via NotificationListenerService</span>
+                        <span>Simulated message</span>
                         <span>Unread</span>
                       </div>
                     </div>
@@ -508,9 +508,9 @@ export const AndroidSimulator: React.FC<AndroidSimulatorProps> = ({
                       <Bell className="w-6 h-6" />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-slate-300">No Active Notifications</div>
+                      <div className="text-sm font-semibold text-slate-300">Preview is empty</div>
                       <p className="text-xs text-slate-500 mt-1">
-                        Select a threat scenario on the left or enter a custom message to test real-time detection.
+                        Choose a sample scenario or enter a message to see a simulated analysis.
                       </p>
                     </div>
                   </div>

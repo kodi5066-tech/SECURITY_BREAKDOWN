@@ -24,7 +24,7 @@ if (apiKey) {
   }
 }
 
-// Built-in rule-based detection engine (matches on-device Kotlin engine)
+// Built-in server-side heuristic detection engine
 interface HeuristicResult {
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
   category: string;
@@ -188,14 +188,14 @@ app.post('/api/analyze', async (req, res) => {
       return res.status(400).json({ error: 'Message content is required' });
     }
 
-    // Always run on-device heuristic baseline first (fastest, private)
+    // Run a server-side heuristic baseline before optional cloud analysis.
     const localResult = evaluateLocally(sender || 'Unknown Sender', message, packageName || 'com.whatsapp');
 
     // If Cloud AI is requested and API key is configured, perform deep threat intelligence
     if (useCloudAi && aiClient) {
       try {
         const prompt = `You are the BrandGuard Digital Risk Protection (DRP) threat intelligence engine.
-Analyze the following incoming Android notification text intercepted from ${packageName || 'a messaging app'}:
+Analyze the following message text submitted by a user from ${packageName || 'a messaging app'}:
 Sender/Title: "${sender || 'Unknown'}"
 Notification Body: "${message}"
 
@@ -233,131 +233,15 @@ Respond ONLY with a valid JSON object matching this schema:
       }
     }
 
-    return res.json(localResult);
+    return res.json({
+      ...localResult,
+      onDeviceProcessed: false,
+      deepAnalysisSource: 'Server-side heuristic fallback',
+    });
   } catch (error: any) {
     console.error('Analysis error:', error);
     res.status(500).json({ error: error.message || 'Internal analysis error' });
   }
-});
-
-// API: Python backend source code for user reference & download
-app.get('/api/python-backend-code', (_req, res) => {
-  const pythonCode = `"""
-BrandGuard DRP - Digital Risk Protection Backend Service
-FastAPI service to ingest threat intelligence, verify malicious URLs,
-and correlate scam campaigns across WhatsApp, Telegram, Instagram & SMS.
-"""
-
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import re
-from typing import List, Optional
-
-app = FastAPI(
-    title="BrandGuard DRP Threat Intelligence API",
-    description="Backend service for Android BrandGuard notification threat detection",
-    version="1.0.0"
-)
-
-class NotificationPayload(BaseModel):
-    package_name: str
-    sender_title: str
-    message_text: str
-    timestamp_ms: Optional[int] = None
-    device_id_hash: Optional[str] = None
-
-class ThreatAnalysisResponse(BaseModel):
-    risk_level: str  # "LOW", "MEDIUM", "HIGH"
-    category: str
-    indicators: List[str]
-    why_suspicious: str
-    recommended_action: str
-    warning_alert: str
-    on_device_fallback: bool = False
-
-# Known malicious patterns & brand impersonation dictionary
-SPOOFED_DOMAINS = [
-    r"paypal.*(?:\\.xyz|\\.top|-login|-verify)",
-    r"chase.*(?:\\.xyz|-security|-alert)",
-    r"apple.*(?:\\.xyz|-support|-id)",
-    r"amazon.*(?:\\.xyz|-gift|-refund)",
-    r"fedex.*(?:\\.xyz|-tracking|-parcel)",
-    r"usps.*(?:\\.xyz|-redelivery)",
-]
-
-URGENCY_REGEX = re.compile(
-    r"(immediate action|account suspended|deactivated within 24|arrest warrant|kyc expired|blocked today)",
-    re.IGNORECASE
-)
-
-FINANCIAL_THEFT_REGEX = re.compile(
-    r"(send otp|share otp|enter pin|cvv|wire transfer|gift card|crypto address)",
-    re.IGNORECASE
-)
-
-@app.post("/api/v1/analyze", response_model=ThreatAnalysisResponse)
-async def analyze_notification(payload: NotificationPayload):
-    text = payload.message_text
-    sender = payload.sender_title
-    indicators = []
-    score = 0
-
-    # 1. Check for suspicious URLs
-    urls = re.findall(r"https?://[^\\s]+", text)
-    if urls:
-        indicators.append(f"Contains link: {urls[0]}")
-        score += 25
-        for pattern in SPOOFED_DOMAINS:
-            if re.search(pattern, urls[0], re.IGNORECASE):
-                indicators.append(f"Spoofed brand domain matching signature: {pattern}")
-                score += 50
-                break
-
-    # 2. Check urgency triggers
-    if URGENCY_REGEX.search(text):
-        indicators.append("Urgent psychological coercion / account termination pressure")
-        score += 35
-
-    # 3. Check credentials / payment requests
-    if FINANCIAL_THEFT_REGEX.search(text):
-        indicators.append("Requests sensitive credentials (OTP/PIN) or unverified payment")
-        score += 45
-
-    # Determine risk category
-    if score >= 60:
-        return ThreatAnalysisResponse(
-            risk_level="HIGH",
-            category="Credential Theft / Brand Impersonation Scam",
-            indicators=indicators,
-            why_suspicious="Message impersonates a trusted entity and creates false urgency to extract credentials or funds.",
-            recommended_action="Do NOT click any link or send OTPs. Block the sender immediately.",
-            warning_alert="⚠️ BrandGuard Warning! This message may be a scam. Avoid clicking suspicious links."
-        )
-    elif score >= 25:
-        return ThreatAnalysisResponse(
-            risk_level="MEDIUM",
-            category="Suspicious External Message",
-            indicators=indicators,
-            why_suspicious="Message contains unverified external links or marketing urgency.",
-            recommended_action="Verify sender identity directly through official channels before proceeding.",
-            warning_alert="⚠️ BrandGuard Caution: Suspicious message detected. Verify sender before responding."
-        )
-    else:
-        return ThreatAnalysisResponse(
-            risk_level="LOW",
-            category="Clean Message",
-            indicators=["No anomalous scam patterns identified"],
-            why_suspicious="Standard messaging pattern with no high-risk indicators.",
-            recommended_action="Standard safety awareness.",
-            warning_alert="ℹ️ BrandGuard: Safe communication."
-        )
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-`;
-  res.setHeader('Content-Type', 'text/plain');
-  res.send(pythonCode);
 });
 
 // Configure Vite or Static Serve

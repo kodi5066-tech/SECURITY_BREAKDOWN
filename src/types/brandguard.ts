@@ -13,6 +13,7 @@ export interface ThreatAnalysis {
 
 export interface NotificationEvent {
   id: string;
+  source: 'sample' | 'simulated' | 'manual';
   timestamp: string;
   appName: string;
   packageName: string;
@@ -25,10 +26,7 @@ export interface NotificationEvent {
 export interface MonitoredApp {
   id: string;
   name: string;
-  packageName: string;
   enabled: boolean;
-  color: string;
-  badge: string;
 }
 
 export interface MonitoringSettingsConfig {

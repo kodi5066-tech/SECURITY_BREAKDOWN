@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { Navbar, NavTab } from './components/Navbar';
 import { AndroidSimulator } from './components/AndroidSimulator';
 import { Dashboard } from './components/Dashboard';
+import { ThreatAnalysis } from './components/ThreatAnalysis';
+import { DeviceProtection } from './components/DeviceProtection';
 import { DetectionHistory } from './components/DetectionHistory';
 import { MonitoringSettings } from './components/MonitoringSettings';
-import { AndroidProjectViewer } from './components/AndroidProjectViewer';
-import { PythonBackendViewer } from './components/PythonBackendViewer';
-import { StepByStepGuide } from './components/StepByStepGuide';
 import { NotificationEvent, MonitoringSettingsConfig } from './types/brandguard';
 
-// Pre-seed sample detection history so user lands on an informative, live dashboard
+// Seed clearly labeled examples so the dashboard is useful before any demo scans.
 const INITIAL_HISTORY: NotificationEvent[] = [
   {
     id: 'seed-1',
+    source: 'sample',
     timestamp: new Date(Date.now() - 1000 * 60 * 14).toISOString(),
     appName: 'WhatsApp',
     packageName: 'com.whatsapp',
@@ -35,6 +35,7 @@ const INITIAL_HISTORY: NotificationEvent[] = [
   },
   {
     id: 'seed-2',
+    source: 'sample',
     timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
     appName: 'Google Messages (SMS)',
     packageName: 'com.google.android.apps.messaging',
@@ -57,6 +58,7 @@ const INITIAL_HISTORY: NotificationEvent[] = [
   },
   {
     id: 'seed-3',
+    source: 'sample',
     timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
     appName: 'Instagram',
     packageName: 'com.instagram.android',
@@ -78,6 +80,7 @@ const INITIAL_HISTORY: NotificationEvent[] = [
   },
   {
     id: 'seed-4',
+    source: 'sample',
     timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
     appName: 'WhatsApp',
     packageName: 'com.whatsapp',
@@ -98,12 +101,12 @@ const INITIAL_HISTORY: NotificationEvent[] = [
 
 const DEFAULT_SETTINGS: MonitoringSettingsConfig = {
   monitoredApps: [
-    { id: 'wa', name: 'WhatsApp', packageName: 'com.whatsapp', enabled: true, color: '#25D366', badge: 'Active' },
-    { id: 'tg', name: 'Telegram', packageName: 'org.telegram.messenger', enabled: true, color: '#0088cc', badge: 'Active' },
-    { id: 'ig', name: 'Instagram Direct', packageName: 'com.instagram.android', enabled: true, color: '#E1306C', badge: 'Active' },
-    { id: 'sms', name: 'Google Messages (SMS)', packageName: 'com.google.android.apps.messaging', enabled: true, color: '#1a73e8', badge: 'Active' },
-    { id: 'samsung_sms', name: 'Samsung Messages', packageName: 'com.samsung.android.messaging', enabled: true, color: '#4f46e5', badge: 'Active' },
-    { id: 'signal', name: 'Signal Messenger', packageName: 'org.thoughtcrime.securesms', enabled: true, color: '#3b82f6', badge: 'Active' },
+    { id: 'wa', name: 'WhatsApp', enabled: true },
+    { id: 'tg', name: 'Telegram', enabled: true },
+    { id: 'ig', name: 'Instagram Direct', enabled: true },
+    { id: 'sms', name: 'Google Messages (SMS)', enabled: true },
+    { id: 'samsung_sms', name: 'Samsung Messages', enabled: true },
+    { id: 'signal', name: 'Signal Messenger', enabled: true },
   ],
   sensitivity: 'BALANCED',
   processLocallyOnly: true,
@@ -118,8 +121,6 @@ export default function App() {
   const [history, setHistory] = useState<NotificationEvent[]>(INITIAL_HISTORY);
   const [settings, setSettings] = useState<MonitoringSettingsConfig>(DEFAULT_SETTINGS);
   const [selectedEvent, setSelectedEvent] = useState<NotificationEvent | null>(null);
-
-  const highRiskCount = history.filter((e) => e.analysis.riskLevel === 'HIGH').length;
 
   const handleNewDetection = (event: NotificationEvent) => {
     setHistory((prev) => [event, ...prev]);
@@ -142,8 +143,7 @@ export default function App() {
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        highRiskCount={highRiskCount}
-        totalIntercepted={history.length}
+        totalRecords={history.length}
       />
 
       {/* Main Content Area */}
@@ -160,7 +160,13 @@ export default function App() {
           <Dashboard
             history={history}
             onSelectEvent={handleInspectEventFromAnywhere}
-            onNavigateToSimulator={() => setActiveTab('simulator')}
+          />
+        )}
+
+        {activeTab === 'threat-analysis' && (
+          <ThreatAnalysis
+            history={history}
+            settings={settings}
             onNewDetection={handleNewDetection}
           />
         )}
@@ -181,16 +187,8 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'android-code' && (
-          <AndroidProjectViewer />
-        )}
-
-        {activeTab === 'python-backend' && (
-          <PythonBackendViewer />
-        )}
-
-        {activeTab === 'guide' && (
-          <StepByStepGuide />
+        {activeTab === 'device-protection' && (
+          <DeviceProtection />
         )}
       </main>
 
@@ -200,12 +198,11 @@ export default function App() {
           <div>
             <span className="font-semibold text-slate-400">BrandGuard DRP Sentinel</span>
             <span className="mx-2">·</span>
-            <span>Digital Risk Protection for Android Notifications</span>
+            <span>Threat analysis demo · Android device not connected</span>
           </div>
 
           <div className="text-[11px] text-slate-500 max-w-xl">
-            Privacy Disclosure: BrandGuard operates exclusively via Android's permitted <code className="text-slate-400 font-mono">NotificationListenerService</code>.
-            It does not access encrypted chat storages, muted chats, or device hardware outside permitted scopes.
+            This browser demo analyzes sample, simulated, or manually entered message text. It does not connect to or monitor an Android device.
           </div>
         </div>
       </footer>

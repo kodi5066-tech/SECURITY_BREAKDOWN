@@ -43,11 +43,10 @@ export const MonitoringSettings: React.FC<MonitoringSettingsProps> = ({
           </div>
           <div>
             <h3 className="text-base font-semibold text-white flex items-center gap-2">
-              Privacy Architecture & Technical Capability Boundary
+              Privacy & Demo Scope
             </h3>
             <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-              BrandGuard relies strictly on Android's native <code className="text-emerald-400 font-mono text-[11px]">NotificationListenerService</code> API.
-              Transparency and trust are paramount in Digital Risk Protection:
+              This website is a browser-based demo and is not connected to an Android device. It cannot read phone notifications.
             </p>
           </div>
         </div>
@@ -56,24 +55,24 @@ export const MonitoringSettings: React.FC<MonitoringSettingsProps> = ({
           <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
             <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
               <CheckCircle2 className="w-4 h-4" />
-              <span>What BrandGuard Can Inspect</span>
+              <span>What the browser demo can analyze</span>
             </div>
             <ul className="text-slate-400 space-y-1 list-disc list-inside">
-              <li>Message sender and text exposed in Android status bar notifications</li>
-              <li>URLs, suspicious phone numbers, and urgency phrases in incoming alerts</li>
-              <li>App package identities (e.g. WhatsApp, Instagram, Telegram)</li>
+              <li>Message text and sender details you enter here</li>
+              <li>Links, urgency language, and common scam requests in that text</li>
+              <li>Sample messages in the simulator</li>
             </ul>
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
             <div className="flex items-center gap-1.5 text-rose-400 font-bold">
               <EyeOff className="w-4 h-4" />
-              <span>What BrandGuard Cannot Access</span>
+              <span>What this demo cannot access</span>
             </div>
             <ul className="text-slate-400 space-y-1 list-disc list-inside">
-              <li>End-to-end encrypted databases or hidden chat histories</li>
-              <li>Muted conversations where notifications are disabled</li>
-              <li>Sensitive banking OTPs or password manager autofills</li>
+              <li>Notifications, messages, or apps on your Android phone</li>
+              <li>Private or encrypted chat histories</li>
+              <li>Other device data or app content</li>
             </ul>
           </div>
         </div>
@@ -84,10 +83,10 @@ export const MonitoringSettings: React.FC<MonitoringSettingsProps> = ({
         <div>
           <h4 className="font-semibold text-white text-sm uppercase tracking-wider text-slate-400 flex items-center gap-2">
             <Smartphone className="w-4 h-4 text-emerald-400" />
-            Monitored Messaging Applications
+            App Preferences
           </h4>
           <p className="text-xs text-slate-400 mt-0.5">
-            Toggle which Android messaging applications BrandGuard should inspect for scams and phishing:
+            These selections are preferences for a future Android companion. They do not enable monitoring in this browser demo.
           </p>
         </div>
 
@@ -106,10 +105,9 @@ export const MonitoringSettings: React.FC<MonitoringSettingsProps> = ({
                 <div className="font-semibold text-xs flex items-center gap-2">
                   <span>{app.name}</span>
                   <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-900 text-slate-400 border border-slate-800">
-                    {app.badge}
+                    {app.enabled ? 'Selected' : 'Not selected'}
                   </span>
                 </div>
-                <div className="text-[11px] font-mono text-slate-500 mt-0.5">{app.packageName}</div>
               </div>
 
               <div
@@ -133,10 +131,10 @@ export const MonitoringSettings: React.FC<MonitoringSettingsProps> = ({
         <div>
           <h4 className="font-semibold text-white text-sm uppercase tracking-wider text-slate-400 flex items-center gap-2">
             <Cpu className="w-4 h-4 text-emerald-400" />
-            Detection Engine & Privacy Configuration
+            Analysis & Privacy Preferences
           </h4>
           <p className="text-xs text-slate-400 mt-0.5">
-            Configure how messages are processed and the threshold for triggering warning notifications.
+            Set the analysis mode and sensitivity used by browser-based scans. Android protection is not connected.
           </p>
         </div>
 
@@ -146,9 +144,9 @@ export const MonitoringSettings: React.FC<MonitoringSettingsProps> = ({
             <div className="flex items-center gap-2.5">
               <Lock className="w-4 h-4 text-emerald-400" />
               <div>
-                <div className="text-xs font-bold text-white">Strict On-Device Processing</div>
+                <div className="text-xs font-bold text-white">Local browser analysis only</div>
                 <p className="text-[11px] text-slate-400">
-                  Analyze messages 100% locally using regex and Kotlin heuristics. No notification text is ever sent over the network.
+                  Analyze entered text in this browser without sending it to the cloud analysis service. This does not analyze phone notifications.
                 </p>
               </div>
             </div>
@@ -192,7 +190,10 @@ export const MonitoringSettings: React.FC<MonitoringSettingsProps> = ({
 
         {/* Alert Notifications Behavior */}
         <div className="space-y-3 pt-2 border-t border-slate-800">
-          <label className="text-xs font-semibold text-slate-300">Warning Alert Delivery Channels</label>
+          <label className="text-xs font-semibold text-slate-300">Future Android Companion Alert Preferences</label>
+          <p className="text-[11px] text-slate-500">
+            These are demo preferences only; no Android companion is connected to deliver alerts.
+          </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <label className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">

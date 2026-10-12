@@ -5,42 +5,37 @@ import {
   LayoutDashboard, 
   History, 
   Sliders, 
-  Code2, 
-  Terminal, 
-  BookOpenCheck,
+  SearchCheck,
+  ShieldCheck,
   Lock
 } from 'lucide-react';
 
 export type NavTab = 
   | 'simulator' 
   | 'dashboard' 
+  | 'threat-analysis'
   | 'history' 
   | 'settings' 
-  | 'android-code' 
-  | 'python-backend' 
-  | 'guide';
+  | 'device-protection';
 
 interface NavbarProps {
   activeTab: NavTab;
   setActiveTab: (tab: NavTab) => void;
-  highRiskCount: number;
-  totalIntercepted: number;
+  totalRecords: number;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
-  highRiskCount,
-  totalIntercepted,
+  totalRecords,
 }) => {
   const tabs: { id: NavTab; label: string; icon: React.ReactNode; badge?: number }[] = [
-    { id: 'simulator', label: 'Android Live Simulator', icon: <Smartphone className="w-4 h-4" /> },
-    { id: 'dashboard', label: 'DRP Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
-    { id: 'history', label: 'Detection History', icon: <History className="w-4 h-4" />, badge: totalIntercepted },
-    { id: 'settings', label: 'Monitoring & Privacy', icon: <Sliders className="w-4 h-4" /> },
-    { id: 'android-code', label: 'Kotlin Android Studio Code', icon: <Code2 className="w-4 h-4" /> },
-    { id: 'python-backend', label: 'Python Backend', icon: <Terminal className="w-4 h-4" /> },
-    { id: 'guide', label: 'Implementation Guide', icon: <BookOpenCheck className="w-4 h-4" /> },
+    { id: 'simulator', label: 'Threat Simulator', icon: <Smartphone className="w-4 h-4" /> },
+    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'threat-analysis', label: 'Threat Analysis', icon: <SearchCheck className="w-4 h-4" /> },
+    { id: 'history', label: 'Detection History', icon: <History className="w-4 h-4" />, badge: totalRecords },
+    { id: 'settings', label: 'Privacy Settings', icon: <Sliders className="w-4 h-4" /> },
+    { id: 'device-protection', label: 'Device Protection', icon: <ShieldCheck className="w-4 h-4" /> },
   ];
 
   return (
@@ -51,12 +46,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center gap-3">
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-600 shadow-lg shadow-emerald-500/20 text-white font-bold">
               <ShieldAlert className="w-6 h-6" />
-              {highRiskCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
-                </span>
-              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -66,17 +55,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-400 hidden sm:block">
-                Android Notification Threat Protection
+                Browser-based message threat analysis demo
               </p>
             </div>
           </div>
 
-          {/* Privacy Badge */}
+          {/* Connection Status */}
           <div className="hidden lg:flex items-center gap-2 text-xs bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-slate-300">
-            <Lock className="w-3.5 h-3.5 text-emerald-400" />
-            <span>On-Device Privacy First</span>
+            <Lock className="w-3.5 h-3.5 text-amber-400" />
+            <span>Browser demo</span>
             <span className="text-slate-500">·</span>
-            <span className="text-slate-400">Notification Access Only</span>
+            <span className="text-amber-300">Android not connected</span>
           </div>
         </div>
 

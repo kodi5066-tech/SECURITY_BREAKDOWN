@@ -62,9 +62,9 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
       <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-semibold text-white">Detection & Interception History</h3>
+            <h3 className="text-base font-semibold text-white">Detection History</h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              Auditable log of messages analyzed by BrandGuard's Android NotificationListenerService.
+              Sample examples, simulated messages, and text analyzed in this browser. No Android device is connected.
             </p>
           </div>
 
@@ -243,7 +243,7 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-bold text-white">Incident Forensics Report</h3>
+                  <h3 className="text-lg font-bold text-white">Analysis Details</h3>
                   <span
                     className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                       selectedEvent.analysis.riskLevel === 'HIGH'
@@ -257,7 +257,7 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-slate-400">
-                  Intercepted on {selectedEvent.appName} ({selectedEvent.packageName}) at{' '}
+                  {selectedEvent.source === 'sample' ? 'Sample example' : selectedEvent.source === 'simulated' ? 'Simulated message' : 'Manual analysis'} ·{' '}
                   {new Date(selectedEvent.timestamp).toLocaleString()}
                 </p>
               </div>
@@ -265,25 +265,25 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
 
             {/* Warning Alert Title Banner */}
             <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-              <div className="text-xs font-medium text-slate-400">Android Warning Alert Displayed:</div>
+              <div className="text-xs font-medium text-slate-400">Suggested warning text:</div>
               <div className="text-sm font-bold text-white">
                 {selectedEvent.analysis.warningAlertText}
               </div>
             </div>
 
-            {/* Notification Raw Payload */}
+            {/* Analyzed Message */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Intercepted Notification Payload
+                Message that was analyzed
               </label>
               <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
                 <div>
-                  <span className="text-slate-500 font-mono">android.app.Notification.EXTRA_TITLE: </span>
+                  <span className="text-slate-500">Sender: </span>
                   <span className="font-semibold text-slate-200">{selectedEvent.sender}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 font-mono">android.app.Notification.EXTRA_TEXT: </span>
-                  <span className="text-slate-300 font-mono bg-slate-900 px-1 py-0.5 rounded break-all">
+                  <span className="text-slate-500">Message: </span>
+                  <span className="text-slate-300 bg-slate-900 px-1 py-0.5 rounded break-all">
                     {selectedEvent.message}
                   </span>
                 </div>
@@ -298,10 +298,16 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
               </div>
 
               <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                <span className="text-slate-400 font-medium">Privacy Status</span>
-                <div className="font-bold text-emerald-400 flex items-center gap-1.5">
+                <span className="text-slate-400 font-medium">Analysis source</span>
+                <div className="font-bold text-cyan-300 flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5" />
-                  <span>On-Device Engine (No Cloud Leak)</span>
+                  <span>
+                    {selectedEvent.source === 'sample'
+                      ? 'Sample data'
+                      : selectedEvent.analysis.deepAnalysisSource
+                      ? selectedEvent.analysis.deepAnalysisSource
+                      : 'Local browser analysis'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -309,7 +315,7 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
             {/* Indicators of Compromise */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Heuristic Signatures & Indicators (IOCs)
+                Risk indicators
               </label>
               <ul className="space-y-1 text-xs">
                 {selectedEvent.analysis.indicators.map((ind, idx) => (
