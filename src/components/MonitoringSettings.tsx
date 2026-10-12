@@ -12,16 +12,18 @@ import {
   EyeOff,
   Cpu
 } from 'lucide-react';
-import { MonitoringSettingsConfig } from '../types/brandguard';
+import { AndroidConnectionStatus, MonitoringSettingsConfig } from '../types/brandguard';
 
 interface MonitoringSettingsProps {
   settings: MonitoringSettingsConfig;
   setSettings: React.Dispatch<React.SetStateAction<MonitoringSettingsConfig>>;
+  androidStatus: AndroidConnectionStatus;
 }
 
 export const MonitoringSettings: React.FC<MonitoringSettingsProps> = ({
   settings,
   setSettings,
+  androidStatus,
 }) => {
   const toggleApp = (id: string) => {
     setSettings((prev) => ({
@@ -46,7 +48,7 @@ export const MonitoringSettings: React.FC<MonitoringSettingsProps> = ({
               Privacy & Demo Scope
             </h3>
             <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-              This website is a browser-based demo and is not connected to an Android device. It cannot read phone notifications.
+              Browser scans remain in this website. Phone notifications are monitored only by the separate native companion; current status: {androidStatus.replace('_', ' ')}.
             </p>
           </div>
         </div>
@@ -86,7 +88,7 @@ export const MonitoringSettings: React.FC<MonitoringSettingsProps> = ({
             App Preferences
           </h4>
           <p className="text-xs text-slate-400 mt-0.5">
-            These selections are preferences for a future Android companion. They do not enable monitoring in this browser demo.
+            These are website-side preferences only. Enable or pause real phone monitoring in the Android companion.
           </p>
         </div>
 
@@ -134,7 +136,7 @@ export const MonitoringSettings: React.FC<MonitoringSettingsProps> = ({
             Analysis & Privacy Preferences
           </h4>
           <p className="text-xs text-slate-400 mt-0.5">
-            Set the analysis mode and sensitivity used by browser-based scans. Android protection is not connected.
+            Set the analysis mode and sensitivity used by browser-based scans. These settings do not alter the Android companion's on-device detector.
           </p>
         </div>
 

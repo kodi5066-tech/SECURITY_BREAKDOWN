@@ -1,18 +1,25 @@
 import React, { useState } from 'react';
 import { Activity, AlertTriangle, CheckCircle2, SearchCheck, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { NotificationEvent, MonitoringSettingsConfig, ThreatAnalysis as ThreatAnalysisResult } from '../types/brandguard';
+import {
+  AndroidConnectionStatus,
+  NotificationEvent,
+  MonitoringSettingsConfig,
+  ThreatAnalysis as ThreatAnalysisResult,
+} from '../types/brandguard';
 import { analyzeMessageWithCloudFallback } from '../utils/engine';
 
 interface ThreatAnalysisProps {
   history: NotificationEvent[];
   settings: MonitoringSettingsConfig;
   onNewDetection: (event: NotificationEvent) => void;
+  androidStatus: AndroidConnectionStatus;
 }
 
 export const ThreatAnalysis: React.FC<ThreatAnalysisProps> = ({
   history,
   settings,
   onNewDetection,
+  androidStatus,
 }) => {
   const [sender, setSender] = useState('');
   const [message, setMessage] = useState('');
@@ -80,11 +87,11 @@ export const ThreatAnalysis: React.FC<ThreatAnalysisProps> = ({
           </div>
           <span className="inline-flex items-center gap-2 text-xs font-medium text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-full px-3 py-1.5">
             <span className="w-2 h-2 rounded-full bg-amber-400" />
-            Browser analysis · Android not connected
+            Browser analysis · Android {androidStatus.replace('_', ' ')}
           </span>
         </div>
         <p className="mt-4 rounded-xl bg-slate-950 border border-slate-800 p-3 text-xs leading-relaxed text-slate-400">
-          This demo analyzes only the text you enter here. It does not read messages from your phone.
+          This form analyzes only the text you enter here. Phone notification analysis runs separately in the native Android companion; its current status is {androidStatus.replace('_', ' ')}.
           {settings.processLocallyOnly
             ? ' Analysis is set to run locally in this browser.'
             : ' Cloud analysis is enabled in Privacy Settings, so entered message text may be sent to the configured analysis service.'}
@@ -96,14 +103,14 @@ export const ThreatAnalysis: React.FC<ThreatAnalysisProps> = ({
           <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400"><Activity className="w-4 h-4" /></div>
           <div>
             <div className="text-2xl font-bold text-white">{analyzedCount}</div>
-            <div className="text-xs text-slate-400">Messages analyzed in this session</div>
+            <div className="text-xs text-slate-400">Browser and Android analyses</div>
           </div>
         </div>
         <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
           <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400"><AlertTriangle className="w-4 h-4" /></div>
           <div>
             <div className="text-2xl font-bold text-white">{flaggedCount}</div>
-            <div className="text-xs text-slate-400">Non-low-risk results from your scans</div>
+            <div className="text-xs text-slate-400">Non-low-risk results</div>
           </div>
         </div>
       </div>

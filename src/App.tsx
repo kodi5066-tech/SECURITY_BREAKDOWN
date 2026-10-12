@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Navbar, NavTab } from './components/Navbar';
 import { AndroidSimulator } from './components/AndroidSimulator';
 import { Dashboard } from './components/Dashboard';
@@ -6,7 +6,12 @@ import { ThreatAnalysis } from './components/ThreatAnalysis';
 import { DeviceProtection } from './components/DeviceProtection';
 import { DetectionHistory } from './components/DetectionHistory';
 import { MonitoringSettings } from './components/MonitoringSettings';
-import { NotificationEvent, MonitoringSettingsConfig } from './types/brandguard';
+import {
+  AndroidConnectionStatus,
+  NotificationEvent,
+  MonitoringSettingsConfig,
+} from './types/brandguard';
+import { fetchAndroidEvents, fetchAndroidStatus } from './utils/androidDashboard';
 
 // Seed clearly labeled examples so the dashboard is useful before any demo scans.
 const INITIAL_HISTORY: NotificationEvent[] = [
@@ -119,8 +124,66 @@ const DEFAULT_SETTINGS: MonitoringSettingsConfig = {
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('simulator');
   const [history, setHistory] = useState<NotificationEvent[]>(INITIAL_HISTORY);
+  const [androidEvents, setAndroidEvents] = useState<NotificationEvent[]>([]);
+  const [dashboardToken, setDashboardToken] = useState(
+    () => window.sessionStorage.getItem('brandguard-android-dashboard-token') ?? ''
+  );
+  const [androidStatus, setAndroidStatus] = useState<AndroidConnectionStatus>('NOT_CONNECTED');
+  const [androidHeartbeatAt, setAndroidHeartbeatAt] = useState<string | null>(null);
+  const [androidConnectionError, setAndroidConnectionError] = useState<string | null>(null);
   const [settings, setSettings] = useState<MonitoringSettingsConfig>(DEFAULT_SETTINGS);
   const [selectedEvent, setSelectedEvent] = useState<NotificationEvent | null>(null);
+  const combinedHistory = useMemo(
+    () => [...history, ...androidEvents].sort(
+      (left, right) => Date.parse(right.timestamp) - Date.parse(left.timestamp)
+    ),
+    [history, androidEvents]
+  );
+
+  useEffect(() => {
+    if (!dashboardToken) {
+      setAndroidStatus('NOT_CONNECTED');
+      setAndroidHeartbeatAt(null);
+      setAndroidEvents([]);
+      setAndroidConnectionError(null);
+      return;
+    }
+
+    let active = true;
+    let pending = false;
+    const refreshAndroidData = async () => {
+      if (pending) return;
+      pending = true;
+      try {
+        const [status, events] = await Promise.all([
+          fetchAndroidStatus(dashboardToken),
+          fetchAndroidEvents(dashboardToken),
+        ]);
+        if (!active) return;
+        setAndroidStatus(status.status);
+        setAndroidHeartbeatAt(status.lastHeartbeatAt);
+        setAndroidEvents(events);
+        setAndroidConnectionError(null);
+      } catch (error) {
+        if (!active) return;
+        setAndroidStatus('NOT_CONNECTED');
+        setAndroidHeartbeatAt(null);
+        setAndroidEvents([]);
+        setAndroidConnectionError(
+          error instanceof Error ? error.message : 'Android status could not be loaded.'
+        );
+      } finally {
+        pending = false;
+      }
+    };
+
+    void refreshAndroidData();
+    const intervalId = window.setInterval(() => void refreshAndroidData(), 20_000);
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+    };
+  }, [dashboardToken]);
 
   const handleNewDetection = (event: NotificationEvent) => {
     setHistory((prev) => [event, ...prev]);
@@ -136,6 +199,17 @@ export default function App() {
     setActiveTab('history');
   };
 
+  const handleSaveDashboardToken = (token: string) => {
+    const trimmed = token.trim();
+    window.sessionStorage.setItem('brandguard-android-dashboard-token', trimmed);
+    setDashboardToken(trimmed);
+  };
+
+  const handleRemoveDashboardToken = () => {
+    window.sessionStorage.removeItem('brandguard-android-dashboard-token');
+    setDashboardToken('');
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
       
@@ -143,7 +217,8 @@ export default function App() {
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        totalRecords={history.length}
+        totalRecords={combinedHistory.length}
+        androidStatus={androidStatus}
       />
 
       {/* Main Content Area */}
@@ -158,25 +233,28 @@ export default function App() {
 
         {activeTab === 'dashboard' && (
           <Dashboard
-            history={history}
+            history={combinedHistory}
             onSelectEvent={handleInspectEventFromAnywhere}
+            androidStatus={androidStatus}
           />
         )}
 
         {activeTab === 'threat-analysis' && (
           <ThreatAnalysis
-            history={history}
+            history={combinedHistory}
             settings={settings}
             onNewDetection={handleNewDetection}
+            androidStatus={androidStatus}
           />
         )}
 
         {activeTab === 'history' && (
           <DetectionHistory
-            history={history}
+            history={combinedHistory}
             onClearHistory={handleClearHistory}
             selectedEvent={selectedEvent}
             setSelectedEvent={setSelectedEvent}
+            androidStatus={androidStatus}
           />
         )}
 
@@ -184,11 +262,19 @@ export default function App() {
           <MonitoringSettings
             settings={settings}
             setSettings={setSettings}
+            androidStatus={androidStatus}
           />
         )}
 
         {activeTab === 'device-protection' && (
-          <DeviceProtection />
+          <DeviceProtection
+            status={androidStatus}
+            lastHeartbeatAt={androidHeartbeatAt}
+            connectionError={androidConnectionError}
+            hasDashboardToken={dashboardToken.length > 0}
+            onSaveDashboardToken={handleSaveDashboardToken}
+            onRemoveDashboardToken={handleRemoveDashboardToken}
+          />
         )}
       </main>
 
@@ -198,11 +284,11 @@ export default function App() {
           <div>
             <span className="font-semibold text-slate-400">BrandGuard DRP Sentinel</span>
             <span className="mx-2">·</span>
-            <span>Threat analysis demo · Android device not connected</span>
+            <span>Threat analysis demo · Android {androidStatus.replace('_', ' ').toLowerCase()}</span>
           </div>
 
           <div className="text-[11px] text-slate-500 max-w-xl">
-            This browser demo analyzes sample, simulated, or manually entered message text. It does not connect to or monitor an Android device.
+            Browser scans analyze sample, simulated, or entered text. Android status is based on a recent authenticated companion heartbeat and granted notification access.
           </div>
         </div>
       </footer>

@@ -1,4 +1,5 @@
 export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
+export type AndroidConnectionStatus = 'NOT_CONNECTED' | 'CONNECTED' | 'PAUSED';
 
 export interface ThreatAnalysis {
   riskLevel: RiskLevel;
@@ -13,7 +14,7 @@ export interface ThreatAnalysis {
 
 export interface NotificationEvent {
   id: string;
-  source: 'sample' | 'simulated' | 'manual';
+  source: 'sample' | 'simulated' | 'manual' | 'android';
   timestamp: string;
   appName: string;
   packageName: string;

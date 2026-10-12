@@ -13,13 +13,14 @@ import {
   ChevronRight,
   X
 } from 'lucide-react';
-import { NotificationEvent, RiskLevel } from '../types/brandguard';
+import { AndroidConnectionStatus, NotificationEvent, RiskLevel } from '../types/brandguard';
 
 interface DetectionHistoryProps {
   history: NotificationEvent[];
   onClearHistory: () => void;
   selectedEvent: NotificationEvent | null;
   setSelectedEvent: (event: NotificationEvent | null) => void;
+  androidStatus: AndroidConnectionStatus;
 }
 
 export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
@@ -27,6 +28,7 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
   onClearHistory,
   selectedEvent,
   setSelectedEvent,
+  androidStatus,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRisk, setFilterRisk] = useState<RiskLevel | 'ALL'>('ALL');
@@ -64,7 +66,7 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
           <div>
             <h3 className="text-base font-semibold text-white">Detection History</h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              Sample examples, simulated messages, and text analyzed in this browser. No Android device is connected.
+              Sample/browser scans and redacted Android companion detections. Android status: {androidStatus.replace('_', ' ')}.
             </p>
           </div>
 
@@ -129,6 +131,7 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
               <option value="Telegram">Telegram</option>
               <option value="Instagram">Instagram</option>
               <option value="Messages (SMS)">Google Messages (SMS)</option>
+              <option value="Android notification">Android companion</option>
             </select>
           </div>
         </div>
@@ -176,11 +179,13 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
                       </td>
 
                       <td className="py-3 px-4 font-mono text-[11px] text-slate-300 max-w-[140px] truncate">
-                        {item.sender}
+                        {item.source === 'android' ? 'Not collected' : item.sender}
                       </td>
 
                       <td className="py-3 px-4 max-w-[280px]">
-                        <p className="line-clamp-2 text-slate-300">"{item.message}"</p>
+                        <p className="line-clamp-2 text-slate-300">
+                          {item.source === 'android' ? item.message : `"${item.message}"`}
+                        </p>
                       </td>
 
                       <td className="py-3 px-4 whitespace-nowrap">
@@ -257,7 +262,13 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-slate-400">
-                  {selectedEvent.source === 'sample' ? 'Sample example' : selectedEvent.source === 'simulated' ? 'Simulated message' : 'Manual analysis'} ·{' '}
+                  {selectedEvent.source === 'android'
+                    ? 'Android companion · analyzed on device'
+                    : selectedEvent.source === 'sample'
+                    ? 'Sample example'
+                    : selectedEvent.source === 'simulated'
+                    ? 'Simulated message'
+                    : 'Manual analysis'} ·{' '}
                   {new Date(selectedEvent.timestamp).toLocaleString()}
                 </p>
               </div>
@@ -274,17 +285,23 @@ export const DetectionHistory: React.FC<DetectionHistoryProps> = ({
             {/* Analyzed Message */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Message that was analyzed
+                {selectedEvent.source === 'android' ? 'Notification privacy' : 'Message that was analyzed'}
               </label>
               <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
                 <div>
                   <span className="text-slate-500">Sender: </span>
-                  <span className="font-semibold text-slate-200">{selectedEvent.sender}</span>
+                  <span className="font-semibold text-slate-200">
+                    {selectedEvent.source === 'android' ? 'Not collected' : selectedEvent.sender}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Message: </span>
+                  <span className="text-slate-500">
+                    {selectedEvent.source === 'android' ? 'Content: ' : 'Message: '}
+                  </span>
                   <span className="text-slate-300 bg-slate-900 px-1 py-0.5 rounded break-all">
-                    {selectedEvent.message}
+                    {selectedEvent.source === 'android'
+                      ? 'Analyzed on device; original notification text is not stored or uploaded.'
+                      : selectedEvent.message}
                   </span>
                 </div>
               </div>

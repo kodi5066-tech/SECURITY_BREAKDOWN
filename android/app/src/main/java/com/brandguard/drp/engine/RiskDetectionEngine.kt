@@ -13,6 +13,7 @@ class RiskDetectionEngine {
         val riskLevel: RiskLevel,
         val category: String,
         val indicators: List<String>,
+        val reasonCodes: List<String>,
         val whySuspicious: String,
         val recommendedAction: String,
         val warningAlertText: String,
@@ -23,17 +24,21 @@ class RiskDetectionEngine {
         val text = message.lowercase(Locale.ROOT)
         val searchableText = "$sender $packageName $message".lowercase(Locale.ROOT)
         val indicators = mutableListOf<String>()
+        val reasonCodes = mutableListOf<String>()
         var score = 0
 
         val urls = URL_PATTERN.findAll(message).map { it.value }.toList()
         if (urls.isNotEmpty()) {
             indicators += "Contains an external link"
+            reasonCodes.add("EXTERNAL_LINK")
             score += 25
             if (urls.any { url -> SPOOFED_BRAND_PATTERN.containsMatchIn(url) }) {
                 indicators += "Link resembles a known brand-spoofing pattern"
+                reasonCodes.add("SUSPICIOUS_DOMAIN")
                 score += 45
             } else if (urls.any { url -> SUSPICIOUS_TLD_PATTERN.containsMatchIn(url) }) {
                 indicators += "Link uses a domain ending often abused in scams"
+                reasonCodes.add("SUSPICIOUS_DOMAIN")
                 score += 30
             }
         }
@@ -41,12 +46,14 @@ class RiskDetectionEngine {
         val urgencyMatches = URGENCY_TERMS.filter(text::contains)
         if (urgencyMatches.isNotEmpty()) {
             indicators += "Uses urgent or threatening language"
+            reasonCodes.add("URGENCY")
             score += 35
         }
 
         val credentialMatches = CREDENTIAL_TERMS.filter(text::contains)
         if (credentialMatches.isNotEmpty()) {
             indicators += "Requests a code, password, financial detail, or payment"
+            reasonCodes.add("CREDENTIAL_REQUEST")
             score += 40
         }
 
@@ -55,6 +62,7 @@ class RiskDetectionEngine {
             (urls.isNotEmpty() || urgencyMatches.isNotEmpty() || credentialMatches.isNotEmpty())
         ) {
             indicators += "May be impersonating a recognized service"
+            reasonCodes.add("BRAND_IMPERSONATION")
             score += 30
         }
 
@@ -63,6 +71,7 @@ class RiskDetectionEngine {
                 riskLevel = RiskLevel.HIGH,
                 category = "Potential phishing or credential scam",
                 indicators = indicators,
+                reasonCodes = reasonCodes.distinct(),
                 whySuspicious = "The message combines signals commonly seen in phishing or payment scams.",
                 recommendedAction = "Do not tap links or share codes. Verify using the official app or contact details.",
                 warningAlertText = "BrandGuard detected a high-risk message."
@@ -71,6 +80,7 @@ class RiskDetectionEngine {
                 riskLevel = RiskLevel.MEDIUM,
                 category = "Suspicious message",
                 indicators = indicators,
+                reasonCodes = reasonCodes.distinct(),
                 whySuspicious = "The message contains an unverified link or pressure language.",
                 recommendedAction = "Verify the sender through an official channel before responding.",
                 warningAlertText = "BrandGuard found a message that needs caution."
@@ -79,6 +89,7 @@ class RiskDetectionEngine {
                 riskLevel = RiskLevel.LOW,
                 category = "No common warning signals found",
                 indicators = indicators.ifEmpty { listOf("No common scam signals were identified") },
+                reasonCodes = reasonCodes.distinct(),
                 whySuspicious = "Automated checks found no common warning signals. This is not a guarantee that the message is safe.",
                 recommendedAction = "Use normal caution and verify unexpected requests independently.",
                 warningAlertText = "BrandGuard did not identify common warning signals."

@@ -4,6 +4,13 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
+import {
+  handleAndroidPair,
+  handleAndroidStatus,
+  handleAndroidEventHistory,
+  handleAndroidThreatEvent,
+  handleAndroidUnpair,
+} from './src/server/androidIntegration';
 
 dotenv.config();
 
@@ -11,7 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '16kb' }));
 
 // Initialize Google GenAI client if key exists
 const apiKey = process.env.GEMINI_API_KEY;
@@ -242,6 +249,30 @@ Respond ONLY with a valid JSON object matching this schema:
     console.error('Analysis error:', error);
     res.status(500).json({ error: error.message || 'Internal analysis error' });
   }
+});
+
+app.post('/api/android/pair', (req, res) => {
+  void handleAndroidPair(req, res);
+});
+
+app.post('/api/android/events', (req, res) => {
+  void handleAndroidThreatEvent(req, res);
+});
+
+app.get('/api/android/events', (req, res) => {
+  void handleAndroidEventHistory(req, res);
+});
+
+app.get('/api/android/status', (req, res) => {
+  void handleAndroidStatus(req, res);
+});
+
+app.post('/api/android/status', (req, res) => {
+  void handleAndroidStatus(req, res);
+});
+
+app.delete('/api/android/device', (req, res) => {
+  void handleAndroidUnpair(req, res);
 });
 
 // Configure Vite or Static Serve

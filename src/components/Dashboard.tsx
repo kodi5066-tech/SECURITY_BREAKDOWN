@@ -8,21 +8,29 @@ import {
   Activity,
   Layers,
 } from 'lucide-react';
-import { NotificationEvent } from '../types/brandguard';
+import { AndroidConnectionStatus, NotificationEvent } from '../types/brandguard';
 
 interface DashboardProps {
   history: NotificationEvent[];
   onSelectEvent: (event: NotificationEvent) => void;
+  androidStatus: AndroidConnectionStatus;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
   history,
   onSelectEvent,
+  androidStatus,
 }) => {
   const total = history.length;
   const highCount = history.filter((e) => e.analysis.riskLevel === 'HIGH').length;
   const medCount = history.filter((e) => e.analysis.riskLevel === 'MEDIUM').length;
   const lowCount = history.filter((e) => e.analysis.riskLevel === 'LOW').length;
+  const androidStatusLabel = androidStatus.replace('_', ' ');
+  const androidStatusColor = androidStatus === 'CONNECTED'
+    ? 'text-emerald-300'
+    : androidStatus === 'PAUSED'
+    ? 'text-amber-300'
+    : 'text-slate-400';
 
   return (
     <div className="space-y-8">
@@ -38,7 +46,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
           <div className="mt-4">
             <div className="text-3xl font-extrabold text-white tracking-tight">{total}</div>
-            <p className="text-xs text-slate-400 mt-1">Includes examples and demo scans</p>
+            <p className="text-xs text-slate-400 mt-1">Examples, browser scans, and Android alerts</p>
           </div>
         </div>
 
@@ -85,8 +93,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <Smartphone className="w-4 h-4 text-amber-300" />
           </div>
           <div className="mt-4">
-            <div className="text-lg font-extrabold text-amber-300 tracking-tight">Not connected</div>
-            <p className="text-xs text-slate-400 mt-1">Browser demo only</p>
+            <div className={`text-lg font-extrabold tracking-tight ${androidStatusColor}`}>{androidStatusLabel}</div>
+            <p className="text-xs text-slate-400 mt-1">Authenticated companion status</p>
           </div>
         </div>
 
@@ -130,7 +138,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-xs text-slate-400">
-            Android device status: <span className="font-semibold text-amber-300">Not connected</span>. No phone notifications are being monitored.
+            Android device status: <span className={`font-semibold ${androidStatusColor}`}>{androidStatusLabel}</span>.
+            {androidStatus === 'CONNECTED'
+              ? ' Recent companion heartbeat confirms notification access and active monitoring.'
+              : androidStatus === 'PAUSED'
+              ? ' The companion is available, but notification monitoring is paused.'
+              : ' No recent authenticated heartbeat with notification access is available.'}
           </div>
         </div>
 
@@ -189,7 +202,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <div className="text-[11px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-900">
                       <span className="truncate max-w-[280px] flex items-center gap-1.5">
                         <span className="text-slate-500 uppercase text-[9px]">
-                          {event.source === 'sample' ? 'Sample' : event.source === 'simulated' ? 'Simulation' : 'Manual'}
+                          {event.source === 'android'
+                            ? 'Android'
+                            : event.source === 'sample'
+                            ? 'Sample'
+                            : event.source === 'simulated'
+                            ? 'Simulation'
+                            : 'Manual'}
                         </span>
                         <span>·</span>
                         <span>{event.analysis.category}</span>

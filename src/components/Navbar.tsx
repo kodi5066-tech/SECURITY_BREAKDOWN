@@ -1,4 +1,5 @@
 import React from 'react';
+import { AndroidConnectionStatus } from '../types/brandguard';
 import { 
   ShieldAlert, 
   Smartphone, 
@@ -22,13 +23,21 @@ interface NavbarProps {
   activeTab: NavTab;
   setActiveTab: (tab: NavTab) => void;
   totalRecords: number;
+  androidStatus: AndroidConnectionStatus;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   totalRecords,
+  androidStatus,
 }) => {
+  const statusLabel = androidStatus.replace('_', ' ');
+  const statusColor = androidStatus === 'CONNECTED'
+    ? 'text-emerald-300'
+    : androidStatus === 'PAUSED'
+    ? 'text-amber-300'
+    : 'text-slate-400';
   const tabs: { id: NavTab; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: 'simulator', label: 'Threat Simulator', icon: <Smartphone className="w-4 h-4" /> },
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -55,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-400 hidden sm:block">
-                Browser-based message threat analysis demo
+                Browser analysis + Android companion
               </p>
             </div>
           </div>
@@ -63,9 +72,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Connection Status */}
           <div className="hidden lg:flex items-center gap-2 text-xs bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-slate-300">
             <Lock className="w-3.5 h-3.5 text-amber-400" />
-            <span>Browser demo</span>
+            <span>BrandGuard web</span>
             <span className="text-slate-500">·</span>
-            <span className="text-amber-300">Android not connected</span>
+            <span className={statusColor}>Android {statusLabel.toLowerCase()}</span>
           </div>
         </div>
 

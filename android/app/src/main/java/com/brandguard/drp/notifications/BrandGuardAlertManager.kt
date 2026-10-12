@@ -55,8 +55,12 @@ class BrandGuardAlertManager(private val context: Context) {
             .setVisibility(Notification.VISIBILITY_PRIVATE)
             .build()
 
-        notificationManager.notify(notificationId, notification)
-        return true
+        return try {
+            notificationManager.notify(notificationId, notification)
+            true
+        } catch (_: SecurityException) {
+            false
+        }
     }
 
     fun showTestWarning(): Boolean {
@@ -64,6 +68,7 @@ class BrandGuardAlertManager(private val context: Context) {
             riskLevel = RiskDetectionEngine.RiskLevel.HIGH,
             category = "Test warning",
             indicators = emptyList(),
+            reasonCodes = emptyList(),
             whySuspicious = "This is a local notification display test.",
             recommendedAction = "This is a test alert; no message was analyzed.",
             warningAlertText = "BrandGuard test warning"
