@@ -31,6 +31,7 @@ export const DeviceProtection: React.FC<DeviceProtectionProps> = ({
     : status === 'PAUSED'
     ? 'bg-amber-400'
     : 'bg-slate-500';
+  const androidAuthenticationVerified = status !== 'NOT_CONNECTED';
 
   const connectDashboard = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -56,10 +57,10 @@ export const DeviceProtection: React.FC<DeviceProtectionProps> = ({
               <h2 className="text-lg font-bold text-white">Device Protection</h2>
               <p className="text-sm mt-1">
                 {status === 'CONNECTED'
-                  ? 'A recent authenticated heartbeat confirms notification access and active monitoring.'
+                  ? 'CONNECTED: Android authentication is verified, notification access is granted, and monitoring is active.'
                   : status === 'PAUSED'
-                  ? 'The companion is authenticated and available, but monitoring is paused.'
-                  : 'No recent authenticated heartbeat with notification access is available.'}
+                  ? 'PAUSED: Android authentication is verified, but notification monitoring is stopped.'
+                  : 'NOT CONNECTED: Android authentication or a current notification-listener heartbeat could not be verified.'}
               </p>
               {lastHeartbeatAt && (
                 <p className="text-xs text-slate-400 mt-2">
@@ -72,6 +73,20 @@ export const DeviceProtection: React.FC<DeviceProtectionProps> = ({
             <span className={`w-2 h-2 rounded-full ${statusDot}`} />
             {status.replace('_', ' ')}
           </span>
+        </div>
+
+        <div className="mt-4 rounded-xl bg-slate-950/70 border border-slate-800 p-4">
+          <div className="flex items-center justify-between gap-3 text-xs">
+            <span className="font-semibold text-slate-300">Android companion authentication</span>
+            <span className={`font-bold ${androidAuthenticationVerified ? 'text-emerald-300' : 'text-slate-400'}`}>
+              {androidAuthenticationVerified ? 'VERIFIED' : 'NOT VERIFIED'}
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+            {androidAuthenticationVerified
+              ? 'The backend verified a fresh signed heartbeat using the Android device key registered during pairing.'
+              : 'A dashboard access key alone does not connect a device. Pair the native Android app and wait for its signed heartbeat.'}
+          </p>
         </div>
 
         {connectionError && (
